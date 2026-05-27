@@ -74,7 +74,59 @@
     </div>
   </section>
 
-  <section class="how-it-works">
+ <section class="how-it-works">
     <div class="container">
       <div class="section-header">
-        <span
+        <span class="section-label">How it works</span>
+        <h2 class="section-title">Three steps to a shorter link</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step__number">1</div>
+          <h3 class="step__title">Paste your URL</h3>
+          <p class="step__desc">Drop in any long URL. Add a custom alias, password, or expiry date if you need them.</p>
+        </div>
+        <div class="step">
+          <div class="step__number">2</div>
+          <h3 class="step__title">Get your short link</h3>
+          <p class="step__desc">Ceez generates a clean short URL and QR code instantly. Copy and share anywhere.</p>
+        </div>
+        <div class="step">
+          <div class="step__number">3</div>
+          <h3 class="step__title">Track your clicks</h3>
+          <p class="step__desc">Watch your analytics update in real time. See traffic sources and click patterns over time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container">
+      <h2 class="cta-section__title">Start shortening for free</h2>
+      <p class="cta-section__sub">No credit card. No limits on links.</p>
+      <a href="/signup" class="btn btn--white">Create your account</a>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function showToast(message) {
+    const toast = document.getElementById('toast')
+    toast.textContent = message
+    toast.classList.add('show')
+    setTimeout(() => toast.classList.remove('show'), 3000)
+  }
+
+  function handleHeroShorten() {
+    const url = document.getElementById('heroUrl').value
+    if (!url) return
+    window.location.href = '/signup'
+  }
+</script>
+
+</body>
+</html>
