@@ -1,0 +1,13 @@
+<%
+  const pageBody = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem;background:var(--color-teal-50);">
+      <div>
+        <div style="font-size:4rem;margin-bottom:1rem;">🔗</div>
+        <h1 style="font-size:2.25rem;font-weight:800;color:var(--color-dark-900);margin-bottom:0.5rem;">${title || 'Page Not Found'}</h1>
+        <p style="color:var(--color-dark-300);margin-bottom:2rem;">${message || 'The page you are looking for does not exist.'}</p>
+        <a href="/" style="background:var(--color-teal-500);color:white;padding:0.75rem 1.5rem;border-radius:9999px;font-weight:600;text-decoration:none;">Go Home</a>
+      </div>
+    </div>
+  `
+%>
+<%- include('../layouts/base', { title: title || '404', body: pageBody, extraCss: '', extraJs: '' }) %>

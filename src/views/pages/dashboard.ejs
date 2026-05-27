@@ -1,0 +1,202 @@
+<%
+const pageBody = `
+<div class="dashboard-page">
+  <header class="dashboard-header">
+    <div class="container dashboard-header__inner">
+      <a href="/" class="dashboard-header__logo">Cee<span>z</span></a>
+      <div class="dashboard-header__user">
+        <span class="dashboard-header__username" id="usernameDisplay"></span>
+        <button class="btn btn--secondary btn--sm" onclick="handleLogout()">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="shorten-section">
+      <div class="shorten-card">
+        <h2 class="shorten-card__title">Shorten a new URL</h2>
+        <form class="shorten-form" id="shortenForm">
+          <div class="form-group">
+            <label for="originalUrl">URL</label>
+            <input type="url" id="originalUrl" placeholder="https://example.com/your-long-url" required />
+          </div>
+          <div class="shorten-form__row">
+            <div class="form-group">
+              <label for="customAlias">Custom alias (optional)</label>
+              <input type="text" id="customAlias" placeholder="my-link" />
+            </div>
+            <div class="form-group">
+              <label for="expiresAt">Expiry date (optional)</label>
+              <input type="date" id="expiresAt" />
+            </div>
+            <div class="form-group">
+              <label for="linkPassword">Password (optional)</label>
+              <input type="password" id="linkPassword" placeholder="Protect this link" />
+            </div>
+          </div>
+          <div id="shortenError" style="display:none;font-size:0.875rem;color:#dc2626;"></div>
+          <button type="submit" class="btn btn--primary shorten-form__submit">Shorten URL</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="links-section">
+      <h2 class="links-section__title">Your links</h2>
+      <div class="links-grid" id="linksGrid">
+        <div class="empty-state" id="emptyState" style="display:none;grid-column:1/-1;">
+          <div class="empty-state__icon">🔗</div>
+          <h3 class="empty-state__title">No links yet</h3>
+          <p>Shorten your first URL above to get started.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+`
+
+const extraJs = `
+<script>
+  const token = localStorage.getItem('token')
+  if (!token) window.location.href = '/login'
+
+  async function apiFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        ...(options.headers || {})
+      },
+      credentials: 'include'
+    })
+  }
+
+  async function loadProfile() {
+    const res = await apiFetch('/api/user/me')
+    const data = await res.json()
+    if (data.status === 'success') {
+      document.getElementById('usernameDisplay').textContent = data.data.username
+    }
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return null
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  function isExpired(expiresAt) {
+    if (!expiresAt) return false
+    return new Date() > new Date(expiresAt)
+  }
+
+  function renderCard(url) {
+    const shortUrl = window.location.origin + '/' + url.short_code
+    const expired = isExpired(url.expires_at)
+    const badges = []
+    if (!url.is_active) badges.push('<span class="badge badge--inactive">Inactive</span>')
+    else if (expired) badges.push('<span class="badge badge--expired">Expired</span>')
+    else badges.push('<span class="badge badge--active">Active</span>')
+    if (url.password) badges.push('<span class="badge badge--protected"> Protected</span>')
+
+    return \`
+      <div class="link-card \${!url.is_active ? 'link-card--inactive' : ''}" id="card-\${url.id}">
+        <div class="link-card__top">
+          <div class="link-card__badges">\${badges.join('')}</div>
+          <span class="link-card__clicks">\${url.clicks} clicks</span>
+        </div>
+        <p class="link-card__short">\${shortUrl}</p>
+        <p class="link-card__original">\${url.original_url}</p>
+        <div class="link-card__meta">
+          <span>Created \${formatDate(url.created_at)}</span>
+          \${url.expires_at ? '<span>Expires ' + formatDate(url.expires_at) + '</span>' : ''}
+        </div>
+        <div class="link-card__qr">
+          <img src="\${url.qr_code}" alt="QR Code" />
+          <a href="\${url.qr_code}" download="ceez-qr-\${url.short_code}.png" class="btn btn--secondary btn--sm">Download QR</a>
+        </div>
+        <div class="link-card__actions">
+          <button class="btn btn--secondary btn--sm" onclick="copyLink('\${shortUrl}')">Copy link</button>
+          <a href="/dashboard/analytics/\${url.id}" class="btn btn--secondary btn--sm">Analytics</a>
+          <button class="btn btn--secondary btn--sm" onclick="toggleLink('\${url.id}', \${url.is_active})">
+            \${url.is_active ? 'Deactivate' : 'Activate'}
+          </button>
+          <button class="btn btn--danger btn--sm" onclick="deleteLink('\${url.id}')">Delete</button>
+        </div>
+      </div>
+    \`
+  }
+
+  async function loadLinks() {
+    const res = await apiFetch('/api/urls')
+    const data = await res.json()
+    const grid = document.getElementById('linksGrid')
+    const empty = document.getElementById('emptyState')
+
+    if (!data.data || data.data.length === 0) {
+      empty.style.display = 'block'
+      return
+    }
+
+    empty.style.display = 'none'
+    grid.innerHTML = data.data.map(renderCard).join('')
+  }
+
+  document.getElementById('shortenForm').addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const errorEl = document.getElementById('shortenError')
+    errorEl.style.display = 'none'
+
+    const body = {
+      originalUrl: document.getElementById('originalUrl').value,
+      customAlias: document.getElementById('customAlias').value,
+      expiresAt: document.getElementById('expiresAt').value,
+      password: document.getElementById('linkPassword').value,
+    }
+
+    const res = await apiFetch('/api/urls', { method: 'POST', body: JSON.stringify(body) })
+    const data = await res.json()
+
+    if (!res.ok) {
+      errorEl.textContent = data.message || 'Failed to shorten URL.'
+      errorEl.style.display = 'block'
+      return
+    }
+
+    document.getElementById('shortenForm').reset()
+    showToast('Link created successfully.')
+    loadLinks()
+  })
+
+  async function deleteLink(id) {
+    if (!confirm('Delete this link? This cannot be undone.')) return
+    const res = await apiFetch('/api/urls/' + id, { method: 'DELETE' })
+    if (res.ok) {
+      showToast('Link deleted.')
+      document.getElementById('card-' + id).remove()
+    }
+  }
+
+  async function toggleLink(id, isActive) {
+    const res = await apiFetch('/api/urls/' + id + '/toggle', { method: 'PATCH' })
+    if (res.ok) {
+      showToast(isActive ? 'Link deactivated.' : 'Link activated.')
+      loadLinks()
+    }
+  }
+
+  function copyLink(url) {
+    navigator.clipboard.writeText(url).then(() => showToast('Link copied to clipboard.'))
+  }
+
+  async function handleLogout() {
+    await apiFetch('/api/auth/logout', { method: 'POST' })
+    localStorage.removeItem('token')
+    window.location.href = '/'
+  }
+
+  loadProfile()
+  loadLinks()
+<\/script>
+`
+%>
+<%- include('../layouts/base', { title: 'Dashboard', body: pageBody, extraCss: '<link rel="stylesheet" href="/css/dashboard.css" />', extraJs: extraJs }) %>

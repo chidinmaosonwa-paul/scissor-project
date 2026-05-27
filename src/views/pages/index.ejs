@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ceez | Shorten URLs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/landing.css" />
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<div class="page">
+  <section class="hero" style="padding-top:calc(var(--nav-height) + var(--space-20));">
+    <div class="container">
+      <span class="hero__label">Fast. Simple. Reliable.</span>
+      <h1 class="hero__headline">
+        Short links that<br/>
+        <span>work harder</span> for you
+      </h1>
+      <p class="hero__subheadline">
+        Shorten any URL, track every click, protect links with passwords,
+        and share QR codes. All in one place.
+      </p>
+      <div class="hero__form">
+        <input type="url" id="heroUrl" placeholder="Paste your long URL here..." />
+        <button class="btn btn--primary" onclick="handleHeroShorten()">Shorten</button>
+      </div>
+      <p class="hero__note">Free to use. No credit card required.</p>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Features</span>
+        <h2 class="section-title">Everything you need</h2>
+        <p class="section-subtitle">
+          Built for people who share links and care about what happens after.
+        </p>
+      </div>
+      <div class="features__grid">
+        <div class="feature-card">
+          <h3 class="feature-card__title">Custom Aliases</h3>
+          <p class="feature-card__desc">
+            Create short links that reflect your brand. Choose your own alias instead of a random code.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3 class="feature-card__title">Click Analytics</h3>
+          <p class="feature-card__desc">
+            See exactly how many times your link was clicked, when, and where traffic came from.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3 class="feature-card__title">Password Protection</h3>
+          <p class="feature-card__desc">
+            Lock sensitive links behind a password. Only people with the right key get through.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3 class="feature-card__title">QR Codes</h3>
+          <p class="feature-card__desc">
+            Every short link comes with a QR code ready to download and share anywhere.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <span

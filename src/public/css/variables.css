@@ -1,0 +1,54 @@
+:root {
+  --color-teal-50: #F0FDFA;
+  --color-teal-100: #CCFBF1;
+  --color-teal-300: #5EEAD4;
+  --color-teal-500: #14B8A6;
+  --color-teal-700: #0F766E;
+  --color-peach-50: #FFF7ED;
+  --color-peach-100: #FFEDD5;
+  --color-peach-300: #FDBA74;
+  --color-peach-500: #F97316;
+  --color-dark-900: #134E4A;
+  --color-dark-700: #1C4A47;
+  --color-dark-300: #6B9E9A;
+  --color-white: #FFFFFF;
+
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 2px 8px rgba(20, 184, 166, 0.08);
+  --shadow-md: 0 4px 16px rgba(20, 184, 166, 0.14);
+  --shadow-lg: 0 8px 32px rgba(20, 184, 166, 0.18);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+
+  --max-width: 1200px;
+  --nav-height: 68px;
+}

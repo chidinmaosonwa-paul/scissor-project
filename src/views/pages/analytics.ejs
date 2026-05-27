@@ -1,0 +1,142 @@
+<%
+const pageBody = `
+<div class="dashboard-page">
+  <header class="dashboard-header">
+    <div class="container dashboard-header__inner">
+      <a href="/" class="dashboard-header__logo">Cee<span>z</span></a>
+      <div class="dashboard-header__user">
+        <span class="dashboard-header__username" id="usernameDisplay"></span>
+        <button class="btn btn--secondary btn--sm" onclick="handleLogout()">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container analytics-page">
+    <a href="/dashboard" class="analytics-back">← Back to dashboard</a>
+
+    <div id="analyticsContent">
+      <p style="color:var(--color-dark-300);">Loading analytics...</p>
+    </div>
+  </div>
+</div>
+`
+
+const extraJs = `
+<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
+<script>
+  const token = localStorage.getItem('token')
+  if (!token) window.location.href = '/login'
+
+  const urlId = window.location.pathname.split('/').pop()
+
+  async function apiFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        ...(options.headers || {})
+      },
+      credentials: 'include'
+    })
+  }
+
+  async function loadProfile() {
+    const res = await apiFetch('/api/user/me')
+    const data = await res.json()
+    if (data.status === 'success') {
+      document.getElementById('usernameDisplay').textContent = data.data.username
+    }
+  }
+
+  async function loadAnalytics() {
+    const res = await apiFetch('/api/urls/' + urlId + '/analytics')
+    const data = await res.json()
+
+    if (!res.ok) {
+      document.getElementById('analyticsContent').innerHTML =
+        '<p style="color:#dc2626;">' + (data.message || 'Failed to load analytics.') + '</p>'
+      return
+    }
+
+    const { url, totalClicks, clicksByDay, topReferrers } = data.data
+    const shortUrl = window.location.origin + '/' + url.short_code
+
+    document.getElementById('analyticsContent').innerHTML = \`
+      <div style="margin-bottom:2rem;">
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--color-dark-900);margin-bottom:0.5rem;">\${shortUrl}</h1>
+        <p style="font-size:0.875rem;color:var(--color-dark-300);word-break:break-all;">\${url.original_url}</p>
+      </div>
+
+      <div class="analytics-stats">
+        <div class="stat-card">
+          <p class="stat-card__number">\${totalClicks}</p>
+          <p class="stat-card__label">Total clicks</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-card__number">\${clicksByDay.reduce((a,b)=>a+b.count,0)}</p>
+          <p class="stat-card__label">Clicks this week</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-card__number">\${topReferrers.length}</p>
+          <p class="stat-card__label">Traffic sources</p>
+        </div>
+      </div>
+
+      <div class="analytics-chart">
+        <h2 class="analytics-chart__title">Clicks over the last 7 days</h2>
+        <canvas id="clicksChart" height="80"></canvas>
+      </div>
+
+      <div class="analytics-referrers">
+        <h2 class="analytics-chart__title">Top referrers</h2>
+        <table class="referrer-table">
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Clicks</th>
+            </tr>
+          </thead>
+          <tbody>
+            \${topReferrers.length > 0
+              ? topReferrers.map(r => '<tr><td>' + r.referrer + '</td><td>' + r.count + '</td></tr>').join('')
+              : '<tr><td colspan="2" style="color:var(--color-dark-300);">No referrer data yet.</td></tr>'
+            }
+          </tbody>
+        </table>
+      </div>
+    \`
+
+    new Chart(document.getElementById('clicksChart'), {
+      type: 'bar',
+      data: {
+        labels: clicksByDay.map(d => d.date),
+        datasets: [{
+          label: 'Clicks',
+          data: clicksByDay.map(d => d.count),
+          backgroundColor: '#14B8A6',
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    })
+  }
+
+  async function handleLogout() {
+    await apiFetch('/api/auth/logout', { method: 'POST' })
+    localStorage.removeItem('token')
+    window.location.href = '/'
+  }
+
+  loadProfile()
+  loadAnalytics()
+<\/script>
+`
+%>
+<%- include('../layouts/base', { title: 'Analytics', body: pageBody, extraCss: '<link rel="stylesheet" href="/css/dashboard.css" />', extraJs: extraJs }) %>

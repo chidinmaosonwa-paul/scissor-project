@@ -1,0 +1,72 @@
+<%
+const pageBody = `
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card__logo">
+      <a href="/">Cee<span>z</span></a>
+    </div>
+    <h1 class="auth-card__title">Create your account</h1>
+    <p class="auth-card__sub">Free forever. No credit card needed.</p>
+
+    <div id="authAlert" class="auth-alert auth-alert--error" style="display:none;"></div>
+
+    <form class="auth-form" id="signupForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="yourname" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="At least 8 characters" required />
+      </div>
+      <button type="submit" class="btn btn--primary auth-form__submit">Create account</button>
+    </form>
+
+    <p class="auth-form__footer">
+      Already have an account? <a href="/login">Log in</a>
+    </p>
+  </div>
+</div>
+`
+
+const extraJs = `
+<script>
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const alertEl = document.getElementById('authAlert')
+    alertEl.style.display = 'none'
+
+    const username = document.getElementById('username').value
+    const email = document.getElementById('email').value
+    const password = document.getElementById('password').value
+
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, email, password })
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        alertEl.textContent = data.message || 'Signup failed.'
+        alertEl.style.display = 'block'
+        return
+      }
+
+      localStorage.setItem('token', data.token)
+      window.location.href = '/dashboard'
+    } catch (err) {
+      alertEl.textContent = 'Something went wrong. Please try again.'
+      alertEl.style.display = 'block'
+    }
+  })
+<\/script>
+`
+%>
+<%- include('../layouts/base', { title: 'Sign Up', body: pageBody, extraCss: '<link rel="stylesheet" href="/css/auth.css" />', extraJs: extraJs }) %>
