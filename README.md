@@ -1,6 +1,6 @@
-# Scissor Project
+# Ceez
 
-This is an API that lets you shorten long URLs into shorter and more manageable links. It was built using Node.js, Express, MongoDB and provides a straightforward API for shortening URLs.
+This is an API that lets you shorten long URLs into shorter and more manageable links. It was built using Node.js, Express, MongoDB and provides a straightforward API for shortening URLs. (Navigate to v2 branch)
 
 # Features
 
